@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -51,8 +52,15 @@ class AuthController extends Controller
     }
 
 
-    public function logout(Request $request){
-        $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'You\'ve logged out successfully']);
+    public function logout(Request $request)
+    {   try{
+        $user = Auth::user();
+        $user->tokens()->delete(); // Revoke all tokens from all authenticated devices
+        return response()->json(['message' => 'You have been logged out successfully']);
+    }
+    catch(\Exception $e){
+        \Log::error('An error occurred while logging out: '. $e->getMessage());
+        return response()->json(['Message'=>'Unauthorized Action', 401]);
+    }
     }
 }
