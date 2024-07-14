@@ -43,6 +43,10 @@ class AuthController extends Controller
             ]);
         }
 
+        if($user->email_verified_at === null){
+            return response()->json(['message'=>'Your account has not yet ben verified. You must verify your email before you can login']);
+        }
+
         $token = $user->createToken('auth_token')->plainTextToken; 
         /* Using platintext token with the context of
          Laravel Sanctum is secure  
