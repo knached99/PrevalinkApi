@@ -10,4 +10,5 @@ Route::get('/user', function (Request $request) {
 
 Route::post('/createAccount', [AuthController::class, 'createAccount']);
 Route::post('/authenticate', [AuthController::class, 'authenticate']);
+Route::post('/verifyEmail/{uuid}', [AuthController::class, 'verifyEmail']);
  Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
