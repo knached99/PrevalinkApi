@@ -31,35 +31,29 @@ class AuthController extends Controller
         return response()->json(['message' => 'Your account has been created successfully'], 201);
     }
 
-    public function authenticate(Request $request)
-    {
+    public function authenticate(Request $request){
+
         $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required',
+            'email'=>'required|string|email',
+            'password'=>'required',
         ]);
-    
+
         $user = User::where('email', $request->email)->first();
-    
-        if (!$user || !Hash::check($request->password, $user->password)) {
+
+        if(!$user || ! Hash::check($request->password, $user->password)){
             throw ValidationException::withMessages([
-                'email' => 'The provided credentials are incorrect'
+                'email'=>'The provided credentials are incorrect'
             ]);
         }
-    
-        if ($user->email_verified_at === null) {
-            $verificationUrl = env('FRONTEND_APP_URL') . '/authentication/verification/email-verification/' . $user->user_id;  // Ensure this is correct
+
+        $token = $user->createToken('auth_token')->plainTextToken; 
+        /* Using platintext token with the context of
+         Laravel Sanctum is secure  
+         */
         
-            return response()->json([
-                'message' => 'Your account has not yet been verified. You must verify your email before you can log in.',
-                'verification_url' => $verificationUrl,
-                'email'=>$user->email
-            ], 403); // Ensure the status code is 403
-        }
-        
-        $token = $user->createToken('auth_token')->plainTextToken;
-    
-        return response()->json(['access_token' => $token, 'token_type' => 'Bearer']);
+        return response()->json(['access_token'=> $token, 'token_type'=>'Bearer']);
     }
+
 
     public function verifyEmail(Request $request, $uuid){
         \Log::info('Email verification started for UUID: ' . $uuid);
